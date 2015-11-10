@@ -21,7 +21,7 @@ myApp.service('client',function(client){
   }
     
   this.streamData = function(){
-      return appbase.readStream({
+      return appbase.getStream({
             type: 'books',
             id: '1'
       })
