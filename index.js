@@ -1,48 +1,39 @@
-var myApp = angular.module('myApp', []);
+var myApp = angular.module('myApp',[]);
 
-myApp.service('client',function(client){
-  
+myApp.factory('client', function(){
+
   var appbase = new Appbase({
-     url: 'https://scalr.api.appbase.io',
-     appname: 'checkin',
-     username: '6PdfXag4h',
-     password: 'b614d8fa-03d8-4005-b6f1-f2ff31cd0f91'
+    url: 'https://scalr.api.appbase.io',
+    appname: 'exampleapp',
+    username: 'ne0iDDSOe',
+    password: 'f0a3ac00-d950-4c1a-942f-6d631686755c'
   });
-  
-  this.updateData = function(exampleVariable){
-    return appbase.index({
-          index: 'checkin',
-          type: 'example',
-          id: '1',
-          body: {
-            exampleVariable : exampleVariable       
-          } 
-    });
-  }
-    
-  this.streamData = function(){
-      return appbase.getStream({
-            type: 'books',
-            id: '1'
-      })
-  }
-  
+
+  function BindVariable (type, id, variableName, $scope) {
+     this.$scope = $scope;
+     this.$scope.$watch(variableName, function(){
+       appbase.index({
+               type: type,
+               id: id,
+               body: {
+                   exampleVariable : $scope[variableName]
+               }
+        }).on('data', function(response) {
+            console.log(response);
+        }).on('error', function(error) {
+            console.log(error);
+        });
+     })
+
+   return {
+     BindVariable: BindVariable
+   }
+
 })
 
-myApp.controller('mycontroller', function ($scope, client) {
-  
-  var updateobj = client.updateData($scope.exampleVariable);
-  updateobj.on('data', function(response) {
-    console.log(response);
-  }).on('error', function(error) {
-    console.log(error);
-  });
-  
-  var streamobj = client.streamData();
-  streamobj.on('data', function(response) {
-    $scope.exampleVariable = response._source.exampleVariable;
-  }).on('error', function(error) {
-    console.log(error)
-  })
+myApp.controller('mycontroller', function (client,$scope) {
+
+  client.BindVariable("example", "1", "exampleVariable", $scope);
+  client.BindVariable("example", "2","exampleVariable2",$scope);
 
 })
