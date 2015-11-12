@@ -11,19 +11,26 @@ myApp.factory('client', function(){
 
   function BindVariable (type, id, variableName, $scope) {
      this.$scope = $scope;
+     
      this.$scope.$watch(variableName, function(){
-       appbase.index({
+         appbase.index({
                type: type,
                id: id,
                body: {
                    exampleVariable : $scope[variableName]
                }
-        }).on('data', function(response) {
-            console.log(response);
-        }).on('error', function(error) {
-            console.log(error);
-        });
+         })
      })
+     
+     appbase.getStream({
+        type: type,
+        id: id
+     }).on('data', function(response) {
+       $scope[variableName] = response._source[variableName];
+     }).on('error', function(error) {
+       console.log("getStream() failed with: ", error)
+    })
+  }
 
    return {
      BindVariable: BindVariable
